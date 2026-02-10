@@ -11,7 +11,7 @@
 3. Copy **Network Path** (Ví dụ: `\\TEN-MAY\ExcelAddins`).
 4. Trong Excel: **File** -> **Options** -> **Trust Center** -> **Trust Center Settings** -> **Trusted Add-in Catalogs**.
 5. Dán đường dẫn vào **Catalog URL** -> **Add catalog** -> Tích **Show in Menu** -> **OK**.
-6. Khởi động lại Excel. Vào **Insert** -> **My Add-ins** -> **Shared Folder** để chọn Auto Excel.
+6. Khởi động lại Excel. Vào **Home** -> **Add-ins** -> **Shared Folder** để chọn Auto Excel.
 
 ---
 
