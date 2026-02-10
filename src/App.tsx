@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Pivot, PivotItem, Stack } from '@fluentui/react';
 import MainPanel from './components/MainPanel';
 import SettingsPanel from './components/SettingsPanel';
 
 const App: React.FC = () => {
-  const [selectedKey, setSelectedKey] = useState<string>('process');
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+  const [selectedKey, setSelectedKey] = React.useState<string>('process');
+  const [theme, setTheme] = React.useState<'light' | 'dark'>(() => {
     return (localStorage.getItem('theme') as 'light' | 'dark') || 'dark';
   });
 
-  useEffect(() => {
+  React.useEffect(() => {
     document.body.className = `theme-${theme}`;
     localStorage.setItem('theme', theme);
   }, [theme]);

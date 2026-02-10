@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { 
   TextField, 
   PrimaryButton, 
@@ -13,13 +13,13 @@ import { processWithGemini } from '../services/GeminiService';
 import './MainPanel.css';
 
 const MainPanel: React.FC = () => {
-  const [prompt, setPrompt] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [apiKey, setApiKey] = useState<string | null>(null);
-  const [history, setHistory] = useState<Array<{ prompt: string; result: string; timestamp: Date }>>([]);
+  const [prompt, setPrompt] = React.useState<string>('');
+  const [loading, setLoading] = React.useState<boolean>(false);
+  const [error, setError] = React.useState<string | null>(null);
+  const [apiKey, setApiKey] = React.useState<string | null>(null);
+  const [history, setHistory] = React.useState<Array<{ prompt: string; result: string; timestamp: Date }>>([]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const storedKey = localStorage.getItem('gemini_api_key');
     setApiKey(storedKey);
   }, []);
@@ -56,8 +56,6 @@ const MainPanel: React.FC = () => {
           timestamp: new Date()
         }]);
       }
-      
-      // Don't clear prompt - keep it for easy editing and reuse
     } catch (err: any) {
       setError(`Lỗi: ${err.message || 'Không thể xử lý yêu cầu.'}`);
     } finally {

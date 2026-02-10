@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { 
   TextField, 
   PrimaryButton, 
@@ -15,15 +15,15 @@ interface SettingsPanelProps {
 }
 
 const SettingsPanel: React.FC<SettingsPanelProps> = ({ theme, onThemeChange }) => {
-  const [apiKey, setApiKey] = useState<string>('');
-  const [saved, setSaved] = useState<boolean>(false);
+  const [apiKey, setApiKey] = React.useState<string>('');
+  const [saved, setSaved] = React.useState<boolean>(false);
 
   const themeOptions: IChoiceGroupOption[] = [
     { key: 'light', text: 'Light Mode', iconProps: { iconName: 'Sunny' } },
     { key: 'dark', text: 'Dark Mode', iconProps: { iconName: 'ClearNight' } },
   ];
 
-  useEffect(() => {
+  React.useEffect(() => {
     const storedKey = localStorage.getItem('gemini_api_key');
     if (storedKey) setApiKey(storedKey);
   }, []);

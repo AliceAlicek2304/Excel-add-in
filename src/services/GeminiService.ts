@@ -100,9 +100,3 @@ export const processWithGemini = async (apiKey: string, prompt: string, jsonData
 
   throw new Error('Không thể kết nối tới Gemini API sau nhiều lần thử. Vui lòng đợi vài giây rồi thử lại.');
 };
-
-export interface GeminiResult {
-  type: 'single' | 'array';
-  value?: string;
-  values?: string[];
-}
