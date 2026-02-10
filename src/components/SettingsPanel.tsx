@@ -3,13 +3,25 @@ import {
   TextField, 
   PrimaryButton, 
   MessageBar, 
-  MessageBarType 
+  MessageBarType,
+  ChoiceGroup,
+  IChoiceGroupOption
 } from '@fluentui/react';
 import './SettingsPanel.css';
 
-const SettingsPanel: React.FC = () => {
+interface SettingsPanelProps {
+  theme: 'light' | 'dark';
+  onThemeChange: (theme: 'light' | 'dark') => void;
+}
+
+const SettingsPanel: React.FC<SettingsPanelProps> = ({ theme, onThemeChange }) => {
   const [apiKey, setApiKey] = useState<string>('');
   const [saved, setSaved] = useState<boolean>(false);
+
+  const themeOptions: IChoiceGroupOption[] = [
+    { key: 'light', text: 'Light Mode', iconProps: { iconName: 'Sunny' } },
+    { key: 'dark', text: 'Dark Mode', iconProps: { iconName: 'ClearNight' } },
+  ];
 
   useEffect(() => {
     const storedKey = localStorage.getItem('gemini_api_key');
@@ -33,6 +45,19 @@ const SettingsPanel: React.FC = () => {
       </div>
 
       <div className="settings-content">
+        <div className="setting-group">
+          <label className="setting-label">
+            <span className="label-icon">🎨</span>
+            Appearance
+          </label>
+          <ChoiceGroup 
+            selectedKey={theme} 
+            options={themeOptions} 
+            onChange={(_, option) => onThemeChange(option?.key as 'light' | 'dark')} 
+            className="theme-selector"
+          />
+        </div>
+
         <div className="setting-group">
           <label className="setting-label">
             <span className="label-icon">🔑</span>

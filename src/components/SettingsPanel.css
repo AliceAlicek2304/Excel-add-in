@@ -104,3 +104,30 @@
 .save-btn:active {
   transform: translateY(0);
 }
+
+/* Theme Selector Styles */
+.theme-selector .ms-ChoiceField-field {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+.theme-selector .ms-ChoiceField-field:hover {
+  background: var(--bg-secondary);
+  border-color: var(--accent-blue);
+}
+
+.theme-selector .ms-ChoiceField-selected .ms-ChoiceField-field {
+  border-color: var(--accent-blue);
+  background: rgba(88, 166, 255, 0.1);
+}
+
+.theme-selector .ms-ChoiceFieldLabel {
+  color: var(--text-primary) !important;
+}
+
+.theme-selector .ms-ChoiceField-iconArea {
+  color: var(--accent-blue);
+}

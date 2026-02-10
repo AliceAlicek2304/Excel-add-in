@@ -1,12 +1,5 @@
 :root {
-  /* Developer Tools Dark Theme - Global Variables */
-  --bg-primary: #0d1117;
-  --bg-secondary: #161b22;
-  --bg-tertiary: #21262d;
-  --border-color: #30363d;
-  --text-primary: #c9d1d9;
-  --text-secondary: #8b949e;
-  --text-muted: #6e7681;
+  /* Common Variables */
   --accent-blue: #58a6ff;
   --accent-green: #3fb950;
   --accent-purple: #bc8cff;
@@ -18,6 +11,35 @@
   --syntax-variable: #ffa657;
 
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+}
+
+/* Light Mode Tokens */
+.theme-light {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #eff1f3;
+  --border-color: #d0d7de;
+  --text-primary: #24292f;
+  --text-secondary: #57606a;
+  --text-muted: #6e7781;
+  --syntax-string: #0550ae;
+  --header-gradient: linear-gradient(135deg, #0969da, #8250df);
+  --btn-shadow: 0 4px 12px rgba(9, 105, 218, 0.2);
+  color-scheme: light;
+}
+
+/* Dark Mode Tokens (Default) */
+.theme-dark {
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-tertiary: #21262d;
+  --border-color: #30363d;
+  --text-primary: #c9d1d9;
+  --text-secondary: #8b949e;
+  --text-muted: #6e7681;
+  --syntax-string: #a5d6ff;
+  --header-gradient: linear-gradient(135deg, #58a6ff, #bc8cff);
+  --btn-shadow: 0 4px 12px rgba(88, 166, 255, 0.3);
   color-scheme: dark;
 }
 
@@ -27,6 +49,7 @@ body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
   overflow: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #root {

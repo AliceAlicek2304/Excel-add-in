@@ -5,6 +5,14 @@ import SettingsPanel from './components/SettingsPanel';
 
 const App: React.FC = () => {
   const [selectedKey, setSelectedKey] = useState<string>('process');
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    return (localStorage.getItem('theme') as 'light' | 'dark') || 'dark';
+  });
+
+  useEffect(() => {
+    document.body.className = `theme-${theme}`;
+    localStorage.setItem('theme', theme);
+  }, [theme]);
 
   return (
     <Stack style={{ height: '100vh', width: '100%', overflow: 'hidden', backgroundColor: 'var(--bg-primary)' }}>
@@ -51,7 +59,7 @@ const App: React.FC = () => {
             <MainPanel />
           </PivotItem>
           <PivotItem headerText="Settings" itemKey="settings">
-            <SettingsPanel />
+            <SettingsPanel theme={theme} onThemeChange={setTheme} />
           </PivotItem>
         </Pivot>
       </Stack.Item>
