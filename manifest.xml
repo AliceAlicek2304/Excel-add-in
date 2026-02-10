@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="TaskPaneApp">
+    <Id>d5c6b6b0-7b5d-4f1a-9b1e-7b7e3f4e5a6b</Id>
+    <Version>1.0.0.0</Version>
+    <ProviderName>Auto Excel</ProviderName>
+    <DefaultLocale>en-US</DefaultLocale>
+    <DisplayName DefaultValue="Auto Excel" />
+    <Description DefaultValue="AI-Powered Excel Assistant using Google Gemini" />
+    <IconUrl DefaultValue="https://alicealicek2304.github.io/Excel-add-in/assets/icon-32.png" />
+    <HighResolutionIconUrl DefaultValue="https://alicealicek2304.github.io/Excel-add-in/assets/icon-64.png" />
+    <SupportUrl DefaultValue="https://github.com/AliceAlicek2304/Excel-add-in" />
+    <AppDomains>
+        <AppDomain>https://generativelanguage.googleapis.com</AppDomain>
+    </AppDomains>
+    <Hosts>
+        <Host Name="Workbook" />
+    </Hosts>
+    <DefaultSettings>
+        <SourceLocation DefaultValue="https://alicealicek2304.github.io/Excel-add-in/" />
+    </DefaultSettings>
+    <Permissions>ReadWriteDocument</Permissions>
+</OfficeApp>
