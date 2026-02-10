@@ -5,7 +5,7 @@ import {
   MessageBar, 
   MessageBarType,
   ChoiceGroup,
-  IChoiceGroupOption
+  type IChoiceGroupOption
 } from '@fluentui/react';
 import './SettingsPanel.css';
 
@@ -41,7 +41,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ theme, onThemeChange }) =
           <span className="title-icon">⚙️</span>
           <h2>Settings</h2>
         </div>
-        <div className="header-subtitle">Configure your Gemini API</div>
+        <div className="header-subtitle">Configure your AI models</div>
       </div>
 
       <div className="settings-content">
@@ -61,7 +61,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ theme, onThemeChange }) =
         <div className="setting-group">
           <label className="setting-label">
             <span className="label-icon">🔑</span>
-            Gemini API Key
+            AI API Key
           </label>
           <TextField 
             type="password" 

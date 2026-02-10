@@ -143,7 +143,7 @@ const MainPanel: React.FC = () => {
       {loading && (
         <div className="loading-section">
           <Spinner size={SpinnerSize.medium} />
-          <span className="loading-text">Đang xử lý với Gemini AI...</span>
+          <span className="loading-text">Đang xử lý với AI...</span>
         </div>
       )}
     </div>

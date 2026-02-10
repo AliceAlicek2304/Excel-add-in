@@ -6,18 +6,19 @@
     <ProviderName>Auto Excel</ProviderName>
     <DefaultLocale>en-US</DefaultLocale>
     <DisplayName DefaultValue="Auto Excel" />
-    <Description DefaultValue="AI-Powered Excel Assistant using Google Gemini" />
+    <Description DefaultValue="AI-Powered Smart Excel Assistant" />
     <IconUrl DefaultValue="https://alicealicek2304.github.io/Excel-add-in/assets/icon-32.png" />
     <HighResolutionIconUrl DefaultValue="https://alicealicek2304.github.io/Excel-add-in/assets/icon-64.png" />
     <SupportUrl DefaultValue="https://github.com/AliceAlicek2304/Excel-add-in" />
     <AppDomains>
         <AppDomain>https://generativelanguage.googleapis.com</AppDomain>
+        <AppDomain>https://alicealicek2304.github.io</AppDomain>
     </AppDomains>
     <Hosts>
         <Host Name="Workbook" />
     </Hosts>
     <DefaultSettings>
-        <SourceLocation DefaultValue="https://alicealicek2304.github.io/Excel-add-in/" />
+        <SourceLocation DefaultValue="https://alicealicek2304.github.io/Excel-add-in/index.html" />
     </DefaultSettings>
     <Permissions>ReadWriteDocument</Permissions>
 </OfficeApp>
