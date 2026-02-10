@@ -1,7 +1,4 @@
-# ⚡ Auto Excel - Gemini AI Assistant
-
-Trợ lý AI giúp xử lý dữ liệu Excel bằng tiếng Việt.
-
+# ⚡ Auto Excel
 ## 🚀 Hướng dẫn cài đặt (Excel Desktop)
 
 ### Bước 1: Tải file Manifest
