@@ -1,37 +1,37 @@
 import React from 'react';
 import { 
-  TextField, 
-  PrimaryButton, 
-  MessageBar, 
-  MessageBarType,
   ChoiceGroup,
-  type IChoiceGroupOption
+  type IChoiceGroupOption,
+  IconButton,
+  Icon
 } from '@fluentui/react';
 import './SettingsPanel.css';
 
 interface SettingsPanelProps {
   theme: 'light' | 'dark';
   onThemeChange: (theme: 'light' | 'dark') => void;
+  apiKey: string | null;
+  onApiKeyLoaded: (key: string) => void;
 }
 
-const SettingsPanel: React.FC<SettingsPanelProps> = ({ theme, onThemeChange }) => {
-  const [apiKey, setApiKey] = React.useState<string>('');
-  const [saved, setSaved] = React.useState<boolean>(false);
-
+const SettingsPanel: React.FC<SettingsPanelProps> = ({ theme, onThemeChange, apiKey, onApiKeyLoaded }) => {
   const themeOptions: IChoiceGroupOption[] = [
     { key: 'light', text: 'Light Mode', iconProps: { iconName: 'Sunny' } },
     { key: 'dark', text: 'Dark Mode', iconProps: { iconName: 'ClearNight' } },
   ];
 
-  React.useEffect(() => {
-    const storedKey = localStorage.getItem('gemini_api_key');
-    if (storedKey) setApiKey(storedKey);
-  }, []);
-
-  const handleSave = () => {
-    localStorage.setItem('gemini_api_key', apiKey);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+  const handleFileLoad = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const content = event.target?.result as string;
+        if (content) {
+          onApiKeyLoaded(content.trim());
+        }
+      };
+      reader.readAsText(file);
+    }
   };
 
   return (
@@ -41,7 +41,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ theme, onThemeChange }) =
           <span className="title-icon">⚙️</span>
           <h2>Settings</h2>
         </div>
-        <div className="header-subtitle">Configure your AI models</div>
+        <div className="header-subtitle">Config & Security</div>
       </div>
 
       <div className="settings-content">
@@ -61,35 +61,49 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ theme, onThemeChange }) =
         <div className="setting-group">
           <label className="setting-label">
             <span className="label-icon">🔑</span>
-            AI API Key
+            Pocket Key Management
           </label>
-          <TextField 
-            type="password" 
-            canRevealPassword 
-            value={apiKey} 
-            onChange={(_: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, val?: string) => setApiKey(val || '')}
-            placeholder="AIza..."
-            className="api-key-input"
-          />
+          <div className="api-input-container">
+            <div className="pocket-key-status">
+              {apiKey ? (
+                <div className="status-active">
+                  <Icon iconName="ShieldSolid" style={{ color: 'var(--accent-green)', marginRight: 8 }} />
+                  Đã nạp Chìa khóa bảo mật (RAM Mode)
+                </div>
+              ) : (
+                <div className="status-inactive">
+                  <Icon iconName="Lock" style={{ marginRight: 8 }} />
+                  Chưa nạp chìa khóa
+                </div>
+              )}
+            </div>
+            <input 
+              type="file" 
+              id="settingsKeyFile" 
+              style={{ display: 'none' }} 
+              onChange={handleFileLoad}
+              accept=".txt"
+            />
+            <IconButton 
+              iconProps={{ iconName: 'OpenFolderHorizontal' }} 
+              title="Nạp từ file .txt" 
+              onClick={() => document.getElementById('settingsKeyFile')?.click()}
+              className="file-load-btn"
+            />
+            {apiKey && (
+              <IconButton 
+                iconProps={{ iconName: 'SignOut' }} 
+                title="Gỡ bỏ Key" 
+                onClick={() => onApiKeyLoaded('')} 
+                className="eject-btn"
+              />
+            )}
+          </div>
           <div className="setting-hint">
-            Get your API key from <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a>
+            <Icon iconName="Shield" style={{ marginRight: 4 }} />
+            Bảo mật tuyệt đối: Key chỉ tồn tại trong RAM và sẽ tự hủy khi đóng Excel.
           </div>
         </div>
-        
-        {saved && (
-          <MessageBar 
-            messageBarType={MessageBarType.success}
-            className="success-bar"
-          >
-            ✓ API Key saved successfully!
-          </MessageBar>
-        )}
-
-        <PrimaryButton 
-          text="Save Configuration" 
-          onClick={handleSave}
-          className="save-btn"
-        />
       </div>
     </div>
   );

@@ -1,18 +1,26 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Pivot, PivotItem, Stack } from '@fluentui/react';
 import MainPanel from './components/MainPanel';
 import SettingsPanel from './components/SettingsPanel';
 
 const App: React.FC = () => {
-  const [selectedKey, setSelectedKey] = React.useState<string>('process');
-  const [theme, setTheme] = React.useState<'light' | 'dark'>(() => {
+  const [selectedKey, setSelectedKey] = useState<string>('process');
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     return (localStorage.getItem('theme') as 'light' | 'dark') || 'dark';
   });
+  
+  // Memory-only API Key (Not persisted to localStorage for security)
+  const [apiKey, setApiKey] = useState<string | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     document.body.className = `theme-${theme}`;
     localStorage.setItem('theme', theme);
   }, [theme]);
+
+  // Clean up localStorage for the old key if it exists (Stealth move)
+  useEffect(() => {
+    localStorage.removeItem('gemini_api_key');
+  }, []);
 
   return (
     <Stack style={{ height: '100vh', width: '100%', overflow: 'hidden', backgroundColor: 'var(--bg-primary)' }}>
@@ -56,10 +64,10 @@ const App: React.FC = () => {
           }}
         >
           <PivotItem headerText="AI Process" itemKey="process">
-            <MainPanel />
+            <MainPanel apiKey={apiKey} onApiKeyLoaded={setApiKey} />
           </PivotItem>
           <PivotItem headerText="Settings" itemKey="settings">
-            <SettingsPanel theme={theme} onThemeChange={setTheme} />
+            <SettingsPanel theme={theme} onThemeChange={setTheme} apiKey={apiKey} onApiKeyLoaded={setApiKey} />
           </PivotItem>
         </Pivot>
       </Stack.Item>

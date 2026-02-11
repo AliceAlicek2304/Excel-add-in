@@ -27,38 +27,59 @@
   letter-spacing: 0.5px;
 }
 
-.api-key-input input {
+.api-input-container {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: var(--bg-tertiary);
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.pocket-key-status {
+  flex: 1;
+  font-size: 13px;
+  font-family: 'Consolas', 'Monaco', monospace;
+}
+
+.status-active {
+  color: var(--accent-green);
+}
+
+.status-inactive {
+  color: var(--text-muted);
+}
+
+.file-load-btn {
   background: var(--bg-secondary) !important;
   border: 1px solid var(--border-color) !important;
-  border-radius: 6px !important;
-  color: var(--text-primary) !important;
-  font-family: 'Consolas', 'Monaco', monospace !important;
-  font-size: 13px !important;
-  padding: 10px 12px !important;
-  transition: all 0.2s ease !important;
-}
-
-.api-key-input input:focus {
-  border-color: var(--accent-blue) !important;
-  box-shadow: 0 0 0 1px var(--accent-blue) !important;
-}
-
-.api-key-input button {
-  background: var(--bg-tertiary) !important;
-  border: 1px solid var(--border-color) !important;
-  color: var(--text-secondary) !important;
-}
-
-.api-key-input button:hover {
-  background: var(--bg-secondary) !important;
   color: var(--accent-blue) !important;
+  height: 32px !important;
+  border-radius: 4px !important;
+}
+
+.file-load-btn:hover {
+  background: var(--bg-primary) !important;
+  border-color: var(--accent-blue) !important;
+}
+
+.eject-btn {
+  color: var(--text-muted);
+}
+
+.eject-btn:hover {
+  color: var(--accent-red);
 }
 
 .setting-hint {
-  margin-top: 8px;
-  font-size: 12px;
-  color: var(--text-muted);
+  margin-top: 12px;
+  font-size: 11px;
+  color: var(--accent-green);
   font-family: 'Consolas', 'Monaco', monospace;
+  display: flex;
+  align-items: center;
+  opacity: 0.8;
 }
 
 .setting-hint a {
