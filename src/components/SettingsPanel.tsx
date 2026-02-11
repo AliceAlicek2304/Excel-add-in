@@ -59,10 +59,6 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ theme, onThemeChange, api
         </div>
 
         <div className="setting-group">
-          <label className="setting-label">
-            <span className="label-icon">🔑</span>
-            Pocket Key Management
-          </label>
           <div className="api-input-container">
             <div className="pocket-key-status">
               {apiKey ? (
@@ -86,7 +82,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ theme, onThemeChange, api
             />
             <IconButton 
               iconProps={{ iconName: 'OpenFolderHorizontal' }} 
-              title="Nạp từ file .txt" 
+              title="Kéo thả file key.txt hoặc chọn file" 
               onClick={() => document.getElementById('settingsKeyFile')?.click()}
               className="file-load-btn"
             />
@@ -98,10 +94,6 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ theme, onThemeChange, api
                 className="eject-btn"
               />
             )}
-          </div>
-          <div className="setting-hint">
-            <Icon iconName="Shield" style={{ marginRight: 4 }} />
-            Bảo mật tuyệt đối: Key chỉ tồn tại trong RAM và sẽ tự hủy khi đóng Excel.
           </div>
         </div>
       </div>

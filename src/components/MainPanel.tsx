@@ -113,8 +113,7 @@ const MainPanel: React.FC<MainPanelProps> = ({ apiKey, onApiKeyLoaded }) => {
         >
           <div className="loader-content">
             <Icon iconName="AzureKeyVault" className="loader-icon" />
-            <h3>Chìa khóa bỏ túi</h3>
-            <p>Kéo thả file <code>key.txt</code> vào đây hoặc chọn file để nạp API Key vào bộ nhớ tạm.</p>
+            <p>Kéo thả file <code>key.txt</code> hoặc chọn file</p>
             <input 
               type="file" 
               id="keyFileInput" 
@@ -123,11 +122,10 @@ const MainPanel: React.FC<MainPanelProps> = ({ apiKey, onApiKeyLoaded }) => {
               accept=".txt"
             />
             <PrimaryButton 
-              text="Chọn file Key" 
+              text="Chọn file" 
               onClick={() => document.getElementById('keyFileInput')?.click()}
               className="select-key-btn"
             />
-            <p className="security-note">🛡️ An toàn: Key chỉ lưu trong RAM, không lưu xuống máy.</p>
           </div>
         </div>
       ) : (
