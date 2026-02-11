@@ -6,6 +6,7 @@ export interface ExcelContext {
   data: ExcelDataRow[];
   usedRangeAddress: string;
   activeCellAddress: string;
+  allSheetNames: string[];
 }
 
 export const getSurroundingData = async (): Promise<ExcelContext> => {
@@ -13,18 +14,21 @@ export const getSurroundingData = async (): Promise<ExcelContext> => {
     const sheet = context.workbook.worksheets.getActiveWorksheet();
     const usedRange = sheet.getUsedRange();
     const activeCell = context.workbook.getActiveCell();
+    const allSheets = context.workbook.worksheets;
     
     usedRange.load("values, address, rowCount, columnCount");
     activeCell.load("address");
+    allSheets.load("items/name");
     
     await context.sync();
 
     const usedRangeAddress = usedRange.address;
     const activeCellAddress = activeCell.address;
+    const allSheetNames = allSheets.items.map(s => s.name);
     const values = usedRange.values;
     
     if (values.length === 0) {
-      return { data: [], usedRangeAddress, activeCellAddress };
+      return { data: [], usedRangeAddress, activeCellAddress, allSheetNames };
     }
 
     // Limit data for AI context (first 50 rows)
@@ -55,7 +59,7 @@ export const getSurroundingData = async (): Promise<ExcelContext> => {
       });
     }
 
-    return { data, usedRangeAddress, activeCellAddress };
+    return { data, usedRangeAddress, activeCellAddress, allSheetNames };
   });
 };
 

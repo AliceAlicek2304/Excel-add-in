@@ -10,9 +10,10 @@ CÚ PHÁP EXCEL:
 1. TRÁNH DÙNG CẢ CỘT: Tuyệt đối dùng vùng cụ thể (ví dụ A1:A10), KHÔNG dùng A:A.
 2. FILTER: =FILTER(vùng_cần_lấy, điều_kiện_lọc)
    - Luôn thêm (vùng_điều_kiện<>"") để bỏ qua ô trống.
-3. KHÔNG GIẢI THÍCH: Tuyệt đối không thêm bất kỳ văn bản nào như "Dưới đây là công thức..." hay "Ghi chú:". Nếu vi phạm, kết quả sẽ bị lỗi.
+4. THAM CHIẾU SHEET KHÁC: Nếu người dùng yêu cầu lấy dữ liệu từ sheet khác, hãy dùng cú pháp: 'Tên Sheet'!Vùng (ví dụ: 'Sheet1'!A1:B10).
+   - Tên của các sheet hiện có được cung cấp trong phần "Danh sách tất cả các Sheet".
 
-YÊU CẦU: Phân tích kỹ "Vùng dữ liệu đang dùng" để chọn địa chỉ ô chính xác.`;
+YÊU CẦU: Phân tích kỹ "Vùng dữ liệu đang dùng" và "Danh sách Sheet" để chọn địa chỉ ô chính xác.`;
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -25,7 +26,7 @@ export interface GeminiResult {
 export const processWithGemini = async (apiKey: string, prompt: string, excelContext: any): Promise<GeminiResult> => {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
-  const { data, usedRangeAddress, activeCellAddress } = excelContext;
+  const { data, usedRangeAddress, activeCellAddress, allSheetNames } = excelContext;
 
   const body = {
     contents: [
@@ -37,6 +38,7 @@ export const processWithGemini = async (apiKey: string, prompt: string, excelCon
 DỮ LIỆU CONTEXT:
 - Vùng dữ liệu đang dùng (Used Range): ${usedRangeAddress}
 - Ô đang chọn (Active Cell): ${activeCellAddress}
+- Danh sách tất cả các Sheet: ${allSheetNames?.join(', ')}
 - Dữ liệu mẫu (JSON): ${JSON.stringify(data)}
 
 YÊU CẦU: ${prompt}`
