@@ -69,7 +69,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ theme, onThemeChange, api
               ) : (
                 <div className="status-inactive">
                   <Icon iconName="Lock" style={{ marginRight: 8 }} />
-                  Chưa nạp chìa khóa
+                  Chưa có key
                 </div>
               )}
             </div>

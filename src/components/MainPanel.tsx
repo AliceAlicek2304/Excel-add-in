@@ -27,7 +27,7 @@ const MainPanel: React.FC<MainPanelProps> = ({ apiKey, onApiKeyLoaded }) => {
 
   const handleProcess = async () => {
     if (!apiKey) {
-      setError('Vui lòng nạp "Chìa khóa bỏ túi" (API Key) để bắt đầu.');
+      setError('Vui lòng nạp Key để bắt đầu.');
       return;
     }
     if (!prompt.trim()) {
