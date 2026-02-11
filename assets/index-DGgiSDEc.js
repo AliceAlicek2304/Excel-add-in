@@ -23,10 +23,11 @@ CÚ PHÁP EXCEL:
 1. TRÁNH DÙNG CẢ CỘT: Tuyệt đối dùng vùng cụ thể (ví dụ A1:A10), KHÔNG dùng A:A.
 2. FILTER: =FILTER(vùng_cần_lấy, điều_kiện_lọc)
    - Luôn thêm (vùng_điều_kiện<>"") để bỏ qua ô trống.
-4. THAM CHIẾU SHEET KHÁC: Nếu người dùng yêu cầu lấy dữ liệu từ sheet khác, hãy dùng cú pháp: 'Tên Sheet'!Vùng (ví dụ: 'Sheet1'!A1:B10).
-   - Tên của các sheet hiện có được cung cấp trong phần "Danh sách tất cả các Sheet".
+4. THAM CHIẾU SHEET KHÁC & LOGIC THEO NGÀY:
+   - Nếu tên các Sheet là số (1, 2, 3...) hoặc chuỗi tuần tự, hãy tự suy luận Sheet trước/sau nếu người dùng yêu cầu (ví dụ: đang ở Sheet '2', yêu cầu 'lấy ngày trước' thì tham chiếu '1'!Range).
+   - Cú pháp: 'Tên Sheet'!Vùng (ví dụ: '1'!G10).
 
-YÊU CẦU: Phân tích kỹ "Vùng dữ liệu đang dùng" và "Danh sách Sheet" để chọn địa chỉ ô chính xác.`,XA=n=>new Promise(i=>setTimeout(i,n)),ZA=async(n,i,o)=>{const r=`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${n}`,{data:u,usedRangeAddress:s,activeCellAddress:d,allSheetNames:v}=o,h={contents:[{parts:[{text:`${QA}
+YÊU CẦU: Phân tích kỹ "Vùng dữ liệu đang dùng", "Ô đang chọn" (để biết đang ở Sheet nào) và "Danh sách Sheet" để trả về công thức thông minh nhất.`,XA=n=>new Promise(i=>setTimeout(i,n)),ZA=async(n,i,o)=>{const r=`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${n}`,{data:u,usedRangeAddress:s,activeCellAddress:d,allSheetNames:v}=o,h={contents:[{parts:[{text:`${QA}
             
 DỮ LIỆU CONTEXT:
 - Vùng dữ liệu đang dùng (Used Range): ${s}
