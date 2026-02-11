@@ -1,22 +1,24 @@
 const SYSTEM_INSTRUCTION = `Bạn là chuyên gia Excel 365. Phân tích yêu cầu và trả về công thức Excel CHÍNH XÁC.
 
 CÚ PHÁP QUAN TRỌNG:
-1. FILTER: =FILTER(vùng_cần_lấy, điều_kiện_lọc)
-   - Lọc cột A và B khi A < 10000 (BỎ QUA Ô TRỐNG): =FILTER(A:B,(A:A<10000)*(A:A<>""))
-   - Lọc nhiều điều kiện: =FILTER(A:B,(A:A>100)*(A:A<1000)*(A:A<>""))
-   - QUAN TRỌNG: Luôn thêm *(A:A<>"") để loại bỏ ô trống khi lọc toàn bộ cột
+1. TRÁNH DÙNG CẢ CỘT: Tuyệt đối KHÔNG dùng các vùng như A:A, B:B để tránh lỗi #SPILL! và tăng tốc độ.
+   - Hãy sử dụng vùng cụ thể dựa trên thông tin "Vùng dữ liệu đang dùng" (Used Range) được cung cấp.
+   - Ví dụ: Thay vì FILTER(A:A,...), hãy dùng FILTER(A1:A100,...).
 
-2. VLOOKUP: =VLOOKUP(giá_trị_tìm,vùng_tìm,số_cột,FALSE)
+2. FILTER: =FILTER(vùng_cần_lấy, điều_kiện_lọc)
+   - Luôn thêm điều kiện loại bỏ ô trống: (vùng_điều_kiện<>"")
+   - Ví dụ lọc cột A:B khi A > 10: =FILTER(A1:B100, (A1:A100>10)*(A1:A100<>""))
 
-3. Vùng ô: Dùng dấu hai chấm (:) - Ví dụ: A1:A10, B:B
+3. VLOOKUP: =VLOOKUP(giá_trị_tìm, vùng_tìm, số_cột, FALSE)
+   - Vùng tìm nên là vùng cụ thể (ví dụ A1:B100).
 
-QUAN TRỌNG: Dữ liệu JSON có key là chữ cái (A, B, C...) tương ứng với tên cột Excel.
+4. Vùng ô: Dùng dấu hai chấm (:).
 
-Trả về:
-- Nếu 1 công thức/giá trị: Trả về trực tiếp (bắt đầu = nếu là công thức)
-- Nếu nhiều giá trị: Trả về JSON array ["giá trị 1","giá trị 2"]
-
-CHỈ trả về kết quả, KHÔNG giải thích.`;
+QUAN TRỌNG:
+- Dữ liệu JSON được cung cấp là mẫu 50 dòng đầu tiên.
+- "Vùng dữ liệu đang dùng" (Used Range) cho biết giới hạn thực tế của bảng.
+- Trả về TRỰC TIẾP công thức (bắt đầu bằng =) hoặc JSON array ["giá trị 1","giá trị 2"] nếu cần ghi vào nhiều ô.
+- CHỈ trả về kết quả, KHÔNG giải thích.`;
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -26,15 +28,24 @@ export interface GeminiResult {
   values?: string[];
 }
 
-export const processWithGemini = async (apiKey: string, prompt: string, jsonData: any): Promise<GeminiResult> => {
+export const processWithGemini = async (apiKey: string, prompt: string, excelContext: any): Promise<GeminiResult> => {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+  const { data, usedRangeAddress, activeCellAddress } = excelContext;
 
   const body = {
     contents: [
       {
         parts: [
           {
-            text: `${SYSTEM_INSTRUCTION}\n\nDữ liệu Excel (JSON): ${JSON.stringify(jsonData)}\n\nYêu cầu: ${prompt}`
+            text: `${SYSTEM_INSTRUCTION}
+            
+DỮ LIỆU CONTEXT:
+- Vùng dữ liệu đang dùng (Used Range): ${usedRangeAddress}
+- Ô đang chọn (Active Cell): ${activeCellAddress}
+- Dữ liệu mẫu (JSON): ${JSON.stringify(data)}
+
+YÊU CẦU: ${prompt}`
           }
         ]
       }
@@ -56,33 +67,25 @@ export const processWithGemini = async (apiKey: string, prompt: string, jsonData
       body: JSON.stringify(body),
     });
 
-    console.log('Response status:', res.status, res.statusText);
-
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
-      console.error('API Error:', JSON.stringify(errorData, null, 2));
-
-      // Retry on 404 or 429 (rate limit)
       if ((res.status === 404 || res.status === 429) && attempt < maxRetries) {
-        const waitTime = attempt * 3000; // 3s, 6s
-        console.log(`Retrying in ${waitTime / 1000}s...`);
+        const waitTime = attempt * 3000;
         await sleep(waitTime);
         continue;
       }
-
       throw new Error(errorData?.error?.message || `HTTP ${res.status}: ${res.statusText}`);
     }
 
-    const data = await res.json();
-
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const resJson = await res.json();
+    const text = resJson?.candidates?.[0]?.content?.parts?.[0]?.text;
+    
     if (!text) {
       throw new Error('Không nhận được phản hồi từ AI.');
     }
 
     const trimmed = text.trim();
 
-    // Check if result is a JSON array (multiple values)
     if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
       try {
         const array = JSON.parse(trimmed);
@@ -94,9 +97,8 @@ export const processWithGemini = async (apiKey: string, prompt: string, jsonData
       }
     }
 
-    // Single value
     return { type: 'single', value: trimmed };
   }
 
-  throw new Error('Không thể kết nối tới Gemini API sau nhiều lần thử. Vui lòng đợi vài giây rồi thử lại.');
+  throw new Error('Không thể kết nối tới Gemini API sau nhiều lần thử.');
 };

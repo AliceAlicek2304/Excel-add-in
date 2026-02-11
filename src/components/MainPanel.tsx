@@ -38,8 +38,8 @@ const MainPanel: React.FC = () => {
     setError(null);
 
     try {
-      const data = await getSurroundingData();
-      const result = await processWithGemini(apiKey, prompt, data);
+      const excelContext = await getSurroundingData();
+      const result = await processWithGemini(apiKey, prompt, excelContext);
       
       if (result.type === 'array' && result.values) {
         await writeArrayToRange(result.values);

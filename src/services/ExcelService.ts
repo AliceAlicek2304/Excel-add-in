@@ -2,45 +2,60 @@ export interface ExcelDataRow {
   [key: string]: any;
 }
 
-export const getSurroundingData = async (): Promise<ExcelDataRow[]> => {
+export interface ExcelContext {
+  data: ExcelDataRow[];
+  usedRangeAddress: string;
+  activeCellAddress: string;
+}
+
+export const getSurroundingData = async (): Promise<ExcelContext> => {
   return await Excel.run(async (context: Excel.RequestContext) => {
     const sheet = context.workbook.worksheets.getActiveWorksheet();
     const usedRange = sheet.getUsedRange();
+    const activeCell = context.workbook.getActiveCell();
+    
     usedRange.load("values, address, rowCount, columnCount");
+    activeCell.load("address");
+    
     await context.sync();
 
+    const usedRangeAddress = usedRange.address;
+    const activeCellAddress = activeCell.address;
     const values = usedRange.values;
-    if (values.length === 0) return [];
+    
+    if (values.length === 0) {
+      return { data: [], usedRangeAddress, activeCellAddress };
+    }
 
-    // If too much data, limit to first 50 rows
+    // Limit data for AI context (first 50 rows)
     const limitedValues = values.length > 50 ? values.slice(0, 50) : values;
 
-    // Check if first row looks like headers
+    // Check headers
     const firstRow = limitedValues[0];
     const hasHeaders = firstRow.every((cell: any) => typeof cell === 'string' && cell.trim() !== '');
 
+    let data: ExcelDataRow[] = [];
     if (hasHeaders && limitedValues.length > 1) {
       const headers = firstRow;
-      const data = limitedValues.slice(1).map((row: any[]) => {
+      data = limitedValues.slice(1).map((row: any[]) => {
         const obj: ExcelDataRow = {};
         headers.forEach((header: any, index: number) => {
           obj[header.toString() || `Column${index}`] = row[index];
         });
         return obj;
       });
-      return data;
     } else {
-      // No headers, use column letters
-      const data = limitedValues.map((row: any[]) => {
+      data = limitedValues.map((row: any[]) => {
         const obj: ExcelDataRow = {};
         row.forEach((cell: any, index: number) => {
-          const colLetter = String.fromCharCode(65 + index); // A, B, C...
+          const colLetter = String.fromCharCode(65 + index); // Simplified A, B, C...
           obj[colLetter] = cell;
         });
         return obj;
       });
-      return data;
     }
+
+    return { data, usedRangeAddress, activeCellAddress };
   });
 };
 
