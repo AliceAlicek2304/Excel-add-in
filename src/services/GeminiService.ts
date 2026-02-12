@@ -99,12 +99,31 @@ YÊU CẦU: ${prompt}`
       throw new Error('Không nhận được phản hồi từ AI.');
     }
 
-    const trimmed = text.trim();
+    let jsonText = text.trim();
+
+    // Attempt to extract JSON from markdown code blocks if they exist
+    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    if (jsonMatch) {
+      jsonText = jsonMatch[1].trim();
+    } else {
+      // Fallback: search for first { or [ and last } or ]
+      const firstBrace = text.indexOf('{');
+      const firstBracket = text.indexOf('[');
+      const lastBrace = text.lastIndexOf('}');
+      const lastBracket = text.lastIndexOf(']');
+
+      const start = (firstBrace !== -1 && (firstBracket === -1 || firstBrace < firstBracket)) ? firstBrace : firstBracket;
+      const end = (lastBrace !== -1 && (lastBracket === -1 || lastBrace > lastBracket)) ? lastBrace : lastBracket;
+
+      if (start !== -1 && end !== -1 && end > start) {
+        jsonText = text.substring(start, end + 1).trim();
+      }
+    }
 
     // Check for Chart JSON or Array JSON
-    if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+    if (jsonText.startsWith('{') || jsonText.startsWith('[')) {
       try {
-        const json = JSON.parse(trimmed);
+        const json = JSON.parse(jsonText);
         if (json.type === 'chart') {
           return { 
             type: 'chart', 
@@ -120,11 +139,11 @@ YÊU CẦU: ${prompt}`
           return { type: 'array', values: json };
         }
       } catch (e) {
-        console.warn('Failed to parse JSON, treating as single value');
+        console.warn('Failed to parse JSON text:', jsonText);
       }
     }
 
-    return { type: 'single', value: trimmed };
+    return { type: 'single', value: text.trim() };
   }
 
   throw new Error('Không thể kết nối tới Gemini API sau nhiều lần thử.');
