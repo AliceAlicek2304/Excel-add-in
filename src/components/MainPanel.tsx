@@ -9,8 +9,15 @@ import {
   IconButton,
   Icon
 } from '@fluentui/react';
-import { getSurroundingData, writeToActiveCell, writeArrayToRange } from '../services/ExcelService';
+import { 
+  getSurroundingData, 
+  writeToActiveCell, 
+  writeArrayToRange,
+  createChart,
+  consolidateAllSheets 
+} from '../services/ExcelService';
 import { processWithGemini } from '../services/GeminiService';
+import { type IContextualMenuProps, ContextualMenuItemType } from '@fluentui/react';
 import './MainPanel.css';
 
 interface MainPanelProps {
@@ -24,6 +31,130 @@ const MainPanel: React.FC<MainPanelProps> = ({ apiKey, onApiKeyLoaded }) => {
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<Array<{ prompt: string; result: string; timestamp: Date }>>([]);
   const [isDragOver, setIsDragOver] = useState(false);
+
+  const handleCreateChart = async (type: string) => {
+    if (!prompt.trim()) {
+      setError('Vui lòng nhập vùng dữ liệu hoặc mô tả bảng trong Request (ví dụ: A1:B10).');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Basic parsing of range from prompt if possible, otherwise use usedRange
+      const rangeMatch = prompt.match(/[A-Z]+[0-9]+:[A-Z]+[0-9]+/i);
+      let rangeToUse = rangeMatch ? rangeMatch[0] : null;
+
+      if (!rangeToUse) {
+        const context = await getSurroundingData();
+        rangeToUse = context.usedRangeAddress;
+      }
+
+      await createChart(type, rangeToUse, "Biểu đồ AI");
+      setHistory(prev => [...prev, { 
+        prompt: `Tạo biểu đồ ${type} cho ${rangeToUse}`, 
+        result: `Đã tạo biểu đồ ${type}`,
+        timestamp: new Date()
+      }]);
+    } catch (err: any) {
+      setError(`Lỗi tạo biểu đồ: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleConsolidate = async (type: string) => {
+    if (!prompt.trim()) {
+      setError('Vui lòng nhập địa chỉ ô cần tổng hợp vào Request (ví dụ: G10).');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const address = prompt.trim().toUpperCase();
+      await consolidateAllSheets(address, type);
+      setHistory(prev => [...prev, { 
+        prompt: `Tổng hợp ô ${address} từ tất cả Sheet`, 
+        result: `Đã tổng hợp & tạo biểu đồ ${type}`,
+        timestamp: new Date()
+      }]);
+    } catch (err: any) {
+      setError(`Lỗi tổng hợp: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Shared styles for all menu levels (Main and Sub-menus)
+  const menuStyles = {
+    container: {
+      backgroundColor: 'var(--bg-secondary)',
+      border: '1px solid var(--border-color)',
+      borderRadius: '8px',
+      boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+    },
+    list: {
+      backgroundColor: 'var(--bg-secondary)',
+    },
+    subComponentStyles: {
+      menuItem: {
+        root: {
+          backgroundColor: 'var(--bg-secondary)',
+          color: 'var(--text-primary)',
+          selectors: {
+            ':hover': {
+              backgroundColor: 'var(--bg-tertiary)',
+              color: 'var(--accent-blue)',
+            },
+            '.ms-ContextualMenu-link': {
+              color: 'var(--text-primary)',
+            },
+            '.ms-ContextualMenu-link:hover': {
+              color: 'var(--accent-blue)',
+            }
+          },
+        },
+      },
+    },
+  };
+
+  const menuProps: IContextualMenuProps = {
+    styles: menuStyles,
+    items: [
+      {
+        key: 'charts',
+        text: 'Tạo biểu đồ',
+        iconProps: { iconName: 'BarChartVerticalFill', styles: { root: { color: 'var(--accent-blue)' } } },
+        subMenuProps: {
+          styles: menuStyles,
+          items: [
+            { key: 'pie', text: 'Biểu đồ Tròn (Pie)', onClick: () => { handleCreateChart('pie'); }, iconProps: { iconName: 'PieSingle', styles: { root: { color: 'var(--accent-orange)' } } } },
+            { key: 'column', text: 'Biểu đồ Cột (Column)', onClick: () => { handleCreateChart('column'); }, iconProps: { iconName: 'BarChartVerticalFill', styles: { root: { color: 'var(--accent-blue)' } } } },
+            { key: 'line', text: 'Biểu đồ Đường (Line)', onClick: () => { handleCreateChart('line'); }, iconProps: { iconName: 'LineChart', styles: { root: { color: 'var(--accent-purple)' } } } },
+          ],
+        },
+      },
+      {
+        key: 'consolidate',
+        text: 'Tổng hợp & Vẽ biểu đồ',
+        iconProps: { iconName: 'Broom', styles: { root: { color: 'var(--accent-green)' } } },
+        title: 'Lấy dữ liệu từ cùng 1 ô ở tất cả các Sheet và vẽ biểu đồ',
+        subMenuProps: {
+          styles: menuStyles,
+          items: [
+            { key: 'cpie', text: 'Tổng hợp -> Tròn', onClick: () => { handleConsolidate('pie'); }, iconProps: { iconName: 'PieSingle' } },
+            { key: 'ccolumn', text: 'Tổng hợp -> Cột', onClick: () => { handleConsolidate('column'); }, iconProps: { iconName: 'BarChartVerticalFill' } },
+            { key: 'cline', text: 'Tổng hợp -> Đường', onClick: () => { handleConsolidate('line'); }, iconProps: { iconName: 'LineChart' } },
+          ],
+        },
+      },
+      { key: 'divider', itemType: ContextualMenuItemType.Divider, styles: { root: { backgroundColor: 'var(--border-color)' } } },
+      { key: 'more', text: 'Sắp có thêm...', disabled: true, styles: { root: { color: 'var(--text-muted)' } } },
+    ],
+  };
 
   const handleProcess = async () => {
     if (!apiKey) {
@@ -195,12 +326,20 @@ const MainPanel: React.FC<MainPanelProps> = ({ apiKey, onApiKeyLoaded }) => {
             </MessageBar>
           )}
 
-          <PrimaryButton 
-            text={loading ? "Processing..." : "Execute"} 
-            onClick={handleProcess} 
-            disabled={loading || !prompt}
-            className="execute-btn"
-          />
+          <div className="action-row">
+            <PrimaryButton 
+              text={loading ? "Processing..." : "Execute"} 
+              onClick={handleProcess} 
+              disabled={loading || !prompt}
+              className="execute-btn"
+            />
+            <IconButton
+              menuProps={menuProps}
+              iconProps={{ iconName: 'Add' }}
+              className="add-service-btn"
+              title="Thêm dịch vụ"
+            />
+          </div>
 
           {loading && (
             <div className="loading-section">

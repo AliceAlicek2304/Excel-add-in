@@ -190,9 +190,15 @@
   color: var(--accent-red) !important;
 }
 
-/* Execute Button */
+/* Execute Button & Action Row */
+.action-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
 .execute-btn {
-  width: 100%;
+  flex: 1;
   height: 40px;
   background: var(--header-gradient) !important;
   border: none !important;
@@ -204,6 +210,27 @@
   letter-spacing: 0.5px !important;
   transition: all 0.3s ease !important;
   box-shadow: var(--btn-shadow) !important;
+}
+
+.add-service-btn {
+  width: 40px;
+  height: 40px;
+  background: var(--bg-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 6px !important;
+  color: var(--accent-blue) !important;
+  transition: all 0.2s ease !important;
+}
+
+.add-service-btn:hover {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--accent-blue) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(88, 166, 255, 0.2) !important;
+}
+
+.add-service-btn:active {
+  transform: translateY(0);
 }
 
 .execute-btn:hover {

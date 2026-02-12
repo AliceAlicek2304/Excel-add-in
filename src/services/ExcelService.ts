@@ -110,3 +110,79 @@ export const writeArrayToRange = async (values: string[]) => {
     await context.sync();
   });
 };
+export const createChart = async (type: string, rangeAddress: string, title: string = "AI Generated Chart") => {
+  await Excel.run(async (context: Excel.RequestContext) => {
+    const sheet = context.workbook.worksheets.getActiveWorksheet();
+    const range = sheet.getRange(rangeAddress);
+    
+    let chartType: Excel.ChartType;
+    switch (type.toLowerCase()) {
+      case 'pie':
+        chartType = Excel.ChartType.pie;
+        break;
+      case 'line':
+        chartType = Excel.ChartType.line;
+        break;
+      case 'column':
+      default:
+        chartType = Excel.ChartType.columnClustered;
+        break;
+    }
+
+    const chart = sheet.charts.add(chartType, range, Excel.ChartSeriesBy.auto);
+    chart.title.text = title;
+    chart.legend.position = Excel.ChartLegendPosition.right;
+    chart.legend.format.fill.setSolidColor("white");
+    
+    await context.sync();
+  });
+};
+export const consolidateAllSheets = async (cellAddress: string, chartTypeStr: string) => {
+  await Excel.run(async (context: Excel.RequestContext) => {
+    const sheets = context.workbook.worksheets;
+    sheets.load("items/name");
+    await context.sync();
+
+    // 1. Create or get "Result" sheet
+    let summarySheet = context.workbook.worksheets.getItemOrNullObject("Result");
+    await context.sync();
+
+    if (summarySheet.isNullObject) {
+      summarySheet = context.workbook.worksheets.add("Result");
+    } else {
+      summarySheet.activate();
+      summarySheet.getUsedRange().clear();
+    }
+
+    const data: any[][] = [["Tên Sheet", `Giá trị (${cellAddress})`]];
+    
+    // 2. Collect data
+    for (const sheet of sheets.items) {
+      if (sheet.name === "Result") continue;
+      
+      const range = sheet.getRange(cellAddress);
+      range.load("values");
+      await context.sync();
+      
+      data.push([sheet.name, range.values[0][0]]);
+    }
+
+    // 3. Write data to summary sheet
+    const targetRange = summarySheet.getRangeByIndexes(0, 0, data.length, 2);
+    targetRange.values = data;
+    summarySheet.activate();
+
+    // 4. Create chart
+    let chartType: Excel.ChartType;
+    switch (chartTypeStr.toLowerCase()) {
+      case 'pie': chartType = Excel.ChartType.pie; break;
+      case 'line': chartType = Excel.ChartType.line; break;
+      default: chartType = Excel.ChartType.columnClustered; break;
+    }
+
+    const chart = summarySheet.charts.add(chartType, targetRange, Excel.ChartSeriesBy.auto);
+    chart.title.text = `Tổng hợp ${cellAddress} từ tất cả các Sheet`;
+    
+    await context.sync();
+  });
+};
