@@ -13,7 +13,8 @@ import {
   getSurroundingData, 
   writeToActiveCell, 
   writeArrayToRange,
-  createChart
+  createChart,
+  write2DArrayToRange
 } from '../services/ExcelService';
 import { processWithGemini } from '../services/GeminiService';
 import { type IContextualMenuProps, ContextualMenuItemType } from '@fluentui/react';
@@ -135,10 +136,17 @@ const MainPanel: React.FC<MainPanelProps> = ({ apiKey, onApiKeyLoaded }) => {
       const result = await processWithGemini(apiKey, actualPrompt, excelContext, intent);
       
       if (result.type === 'chart' && result.chartData) {
-        await createChart(result.chartData.type, result.chartData.range, result.chartData.title);
+        let chartRange = result.chartData.range;
+        
+        // If it's a smart chart with a summary table
+        if (result.chartData.table) {
+          chartRange = await write2DArrayToRange(result.chartData.table);
+        }
+
+        await createChart(result.chartData.type, chartRange, result.chartData.title);
         setHistory(prev => [...prev, { 
           prompt: actualPrompt, 
-          result: `Đã tạo biểu đồ ${result.chartData?.type} cho ${result.chartData?.range}`,
+          result: `Đã tạo biểu đồ ${result.chartData?.type}${result.chartData?.table ? ' (kèm bảng tổng hợp)' : ''} cho ${chartRange}`,
           timestamp: new Date()
         }]);
       } else if (result.type === 'array' && result.values) {

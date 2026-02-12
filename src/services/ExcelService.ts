@@ -186,3 +186,27 @@ export const consolidateAllSheets = async (cellAddress: string, chartTypeStr: st
     await context.sync();
   });
 };
+
+export const write2DArrayToRange = async (data: any[][]): Promise<string> => {
+  return await Excel.run(async (context: Excel.RequestContext) => {
+    const range = context.workbook.getActiveCell();
+    const rows = data.length;
+    const cols = data[0].length;
+    
+    // Resize range from active cell to fit the 2D array
+    const targetRange = range.getResizedRange(rows - 1, cols - 1);
+    
+    // Check if any value is a formula
+    const hasFormula = data.some(row => row.some(cell => typeof cell === 'string' && cell.startsWith("=")));
+    
+    if (hasFormula) {
+      targetRange.formulas = data;
+    } else {
+      targetRange.values = data;
+    }
+    
+    targetRange.load("address");
+    await context.sync();
+    return targetRange.address;
+  });
+};

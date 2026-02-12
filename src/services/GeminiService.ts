@@ -15,9 +15,11 @@ CÚ PHÁP EXCEL:
    - Cú pháp: 'Tên Sheet'!Vùng (ví dụ: '1'!G10).
 
 YÊU CẦU: Phân tích kỹ "Vùng dữ liệu đang dùng", "Ô đang chọn" (để biết đang ở Sheet nào) và "Danh sách Sheet" để trả về công thức thông minh nhất.
-3. TẠO BIỂU ĐỒ (AI CHART): Nếu người dùng yêu cầu vẽ biểu đồ, hãy trả về JSON định dạng sau:
-   - {"type": "chart", "chartType": "pie"|"column"|"line", "range": "Vùng dữ liệu", "title": "Tiêu đề biểu đồ"}
-   - Lưu ý: Hãy chọn vùng dữ liệu có chứa cả tiêu đề và số liệu để biểu đồ đẹp nhất.`;
+3. TẠO BIỂU ĐỒ (AI SMART CHART):
+   - Nếu dữ liệu người dùng yêu cầu (ví dụ A21:B25) CHỈ chứa chữ mà không có số để vẽ biểu đồ, hãy TỰ ĐỀ XUẤT 1 bảng tổng hợp (ví dụ: đếm số lượng xuất hiện).
+   - Trả về JSON: {"type": "chart", "chartType": "pie"|"column"|"line", "title": "Tiêu đề", "table": [["Tiêu đề 1", "Tiêu đề 2"], ["Giá trị 1", "Giá trị 2"]]}
+   - Lưu ý: "table" là mảng 2 chiều chứa cả tiêu đề và dữ liệu/công thức. Nếu có table, "range" sẽ được hệ thống tự tính toán dựa trên vị trí đặt bảng.
+   - Nếu dữ liệu đã chuẩn (có số), chỉ cần: {"type": "chart", "chartType": "...", "range": "...", "title": "..."}`;
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -29,6 +31,8 @@ export interface GeminiResult {
     type: 'pie' | 'column' | 'line';
     range: string;
     title: string;
+    // New fields for smart charting
+    table?: any[][]; 
   };
 }
 
@@ -106,8 +110,9 @@ YÊU CẦU: ${prompt}`
             type: 'chart', 
             chartData: { 
               type: json.chartType, 
-              range: json.range, 
-              title: json.title 
+              range: json.range || "", 
+              title: json.title,
+              table: json.table
             } 
           };
         }
