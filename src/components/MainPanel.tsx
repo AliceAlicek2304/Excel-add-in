@@ -13,8 +13,7 @@ import {
   getSurroundingData, 
   writeToActiveCell, 
   writeArrayToRange,
-  createChart,
-  consolidateAllSheets 
+  createChart
 } from '../services/ExcelService';
 import { processWithGemini } from '../services/GeminiService';
 import { type IContextualMenuProps, ContextualMenuItemType } from '@fluentui/react';
@@ -33,18 +32,19 @@ const MainPanel: React.FC<MainPanelProps> = ({ apiKey, onApiKeyLoaded }) => {
   const [isDragOver, setIsDragOver] = useState(false);
 
   const handleCreateChart = async (type: string) => {
-    if (!apiKey) return;
-    const aiPrompt = `Hãy phân tích vùng dữ liệu hoặc yêu cầu sau và tạo một biểu đồ ${type}: ${prompt}`;
-    setPrompt(aiPrompt);
-    // Explicitly call handleProcess with the enriched prompt
-    setTimeout(handleProcess, 0);
+    if (!prompt.trim()) {
+      setError('Vui lòng nhập vùng dữ liệu hoặc mô tả bảng trong Request (ví dụ: A1:B10).');
+      return;
+    }
+    await handleProcess(prompt, `CREATE_CHART:${type.toUpperCase()}`);
   };
 
   const handleConsolidate = async (type: string) => {
-    if (!apiKey) return;
-    const aiPrompt = `Hãy tổng hợp dữ liệu từ ô ${prompt} ở tất cả các sheet và vẽ biểu đồ ${type}`;
-    setPrompt(aiPrompt);
-    setTimeout(handleProcess, 0);
+    if (!prompt.trim()) {
+      setError('Vui lòng nhập tên ô (ví dụ: G10) vào Request.');
+      return;
+    }
+    await handleProcess(prompt, `CONSOLIDATE_AND_CHART:${type.toUpperCase()}`);
   };
 
   // Shared styles for all menu levels (Main and Sub-menus)
@@ -115,12 +115,14 @@ const MainPanel: React.FC<MainPanelProps> = ({ apiKey, onApiKeyLoaded }) => {
     ],
   };
 
-  const handleProcess = async () => {
+  const handleProcess = async (promptOverride?: string, intent?: string) => {
     if (!apiKey) {
       setError('Vui lòng nạp Key để bắt đầu.');
       return;
     }
-    if (!prompt.trim()) {
+    
+    const actualPrompt = promptOverride || prompt;
+    if (!actualPrompt.trim()) {
       setError('Vui lòng nhập yêu cầu của bạn.');
       return;
     }
@@ -130,26 +132,26 @@ const MainPanel: React.FC<MainPanelProps> = ({ apiKey, onApiKeyLoaded }) => {
 
     try {
       const excelContext = await getSurroundingData();
-      const result = await processWithGemini(apiKey, prompt, excelContext);
+      const result = await processWithGemini(apiKey, actualPrompt, excelContext, intent);
       
       if (result.type === 'chart' && result.chartData) {
         await createChart(result.chartData.type, result.chartData.range, result.chartData.title);
         setHistory(prev => [...prev, { 
-          prompt, 
+          prompt: actualPrompt, 
           result: `Đã tạo biểu đồ ${result.chartData?.type} cho ${result.chartData?.range}`,
           timestamp: new Date()
         }]);
       } else if (result.type === 'array' && result.values) {
         await writeArrayToRange(result.values);
         setHistory(prev => [...prev, { 
-          prompt, 
+          prompt: actualPrompt, 
           result: `[${result.values?.length || 0} giá trị]`,
           timestamp: new Date()
         }]);
       } else if (result.type === 'single' && result.value) {
         await writeToActiveCell(result.value);
         setHistory(prev => [...prev, { 
-          prompt, 
+          prompt: actualPrompt, 
           result: result.value || '',
           timestamp: new Date()
         }]);
@@ -295,7 +297,7 @@ const MainPanel: React.FC<MainPanelProps> = ({ apiKey, onApiKeyLoaded }) => {
           <div className="action-row">
             <PrimaryButton 
               text={loading ? "Processing..." : "Execute"} 
-              onClick={handleProcess} 
+              onClick={() => handleProcess()} 
               disabled={loading || !prompt}
               className="execute-btn"
             />

@@ -32,7 +32,12 @@ export interface GeminiResult {
   };
 }
 
-export const processWithGemini = async (apiKey: string, prompt: string, excelContext: any): Promise<GeminiResult> => {
+export const processWithGemini = async (
+  apiKey: string, 
+  prompt: string, 
+  excelContext: any,
+  intent?: string
+): Promise<GeminiResult> => {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
   const { data, usedRangeAddress, activeCellAddress, allSheetNames } = excelContext;
@@ -50,6 +55,7 @@ DỮ LIỆU CONTEXT:
 - Danh sách tất cả các Sheet: ${allSheetNames?.join(', ')}
 - Dữ liệu mẫu (JSON): ${JSON.stringify(data)}
 
+${intent ? `[INTENT: ${intent}]` : ''}
 YÊU CẦU: ${prompt}`
           }
         ]
