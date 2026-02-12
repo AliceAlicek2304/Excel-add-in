@@ -40,7 +40,7 @@ export const processWithGemini = async (
   excelContext: any,
   intent?: string
 ): Promise<GeminiResult> => {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
   const { data, usedRangeAddress, activeCellAddress, allSheetNames } = excelContext;
 
