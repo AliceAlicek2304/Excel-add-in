@@ -30,7 +30,7 @@ RULES:
    - Use the provided "allSheetNames" list.
    - Example table: [["Sheet", "Value"], ["Sheet1", "='Sheet1'!F1"], ["Sheet2", "='Sheet2'!F1"]]
 3. Filter: Always add (condition_range<>"") to ignore blank cells.
-4. Absolutely NO text explanation. ONLY JSON.`,JA=n=>new Promise(i=>setTimeout(i,n)),$A=async(n,i,o,r)=>{const u=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${n}`,{data:s,usedRangeAddress:d,activeCellAddress:v,allSheetNames:m}=o,h={contents:[{parts:[{text:`${ZA}
+4. Absolutely NO text explanation. ONLY JSON.`,JA=n=>new Promise(i=>setTimeout(i,n)),$A=async(n,i,o,r)=>{const u=`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${n}`,{data:s,usedRangeAddress:d,activeCellAddress:v,allSheetNames:m}=o,h={contents:[{parts:[{text:`${ZA}
             
 CONTEXT DATA:
 - Used Range: ${d}
