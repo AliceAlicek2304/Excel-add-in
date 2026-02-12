@@ -64,7 +64,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ theme, onThemeChange, api
               {apiKey ? (
                 <div className="status-active">
                   <Icon iconName="ShieldSolid" style={{ color: 'var(--accent-green)', marginRight: 8 }} />
-                  Đã nạp Chìa khóa bảo mật (RAM Mode)
+                  OK!
                 </div>
               ) : (
                 <div className="status-inactive">

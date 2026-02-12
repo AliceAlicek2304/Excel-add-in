@@ -132,7 +132,7 @@ const MainPanel: React.FC<MainPanelProps> = ({ apiKey, onApiKeyLoaded }) => {
         <>
           <div className="api-status-bar">
             <Icon iconName="ShieldSolid" className="status-icon" />
-            <span>Đã nạp Chìa khóa bảo mật (RAM Mode)</span>
+            <span>OK!</span>
             <IconButton 
               iconProps={{ iconName: 'SignOut' }} 
               title="Gỡ bỏ Key" 
