@@ -1,20 +1,23 @@
-const SYSTEM_INSTRUCTION = `Bạn là chuyên gia Excel 365. PHẢI TRẢ VỀ JSON theo schema sau:
+const SYSTEM_INSTRUCTION = `You are an Excel 365 expert. You MUST RETURN JSON according to the following schema:
 {
   "type": "single" | "array" | "chart",
-  "value": "nếu là single (ví dụ công thức =SUM...)",
-  "values": ["nếu là array (danh sách công thức/giá trị)"],
+  "value": "if single (e.g., formula =SUM...)",
+  "values": ["if array (list of formulas/values)"],
   "chartData": {
     "type": "pie" | "column" | "line",
-    "title": "Tiêu đề",
-    "range": "Vùng dữ liệu",
-    "table": [["Tiêu đề 1", "Tiêu đề 2"], ["Dòng 1 cột 1", "Dòng 1 cột 2"]]
+    "title": "Title",
+    "range": "Data range",
+    "table": [["Header 1", "Header 2"], ["Row 1 Col 1", "Row 1 Col 2"]]
   }
 }
 
-QUY TẮC:
-1. SMART CHART: Nếu vùng yêu cầu (vd A21:B25) chỉ có chữ, hãy tự tạo "table" tổng hợp đếm số lượng.
-2. Filter: Luôn thêm (vùng_điều_kiện<>"") để bỏ qua ô trống.
-3. Tuyệt đối KHÔNG GIẢI THÍCH bản văn. Chỉ JSON.`;
+RULES:
+1. SMART CHART: If requested range (e.g., A21:B25) contains ONLY text, automatically generate a summary "table" (e.g., counting occurrences).
+2. CONSOLIDATE: If intent is CONSOLIDATE_AND_CHART, create a "table" using FORMULAS referencing other sheets.
+   - Use the provided "allSheetNames" list.
+   - Example table: [["Sheet", "Value"], ["Sheet1", "='Sheet1'!F1"], ["Sheet2", "='Sheet2'!F1"]]
+3. Filter: Always add (condition_range<>"") to ignore blank cells.
+4. Absolutely NO text explanation. ONLY JSON.`;
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -37,7 +40,7 @@ export const processWithGemini = async (
   excelContext: any,
   intent?: string
 ): Promise<GeminiResult> => {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
 
   const { data, usedRangeAddress, activeCellAddress, allSheetNames } = excelContext;
 
@@ -48,14 +51,14 @@ export const processWithGemini = async (
           {
             text: `${SYSTEM_INSTRUCTION}
             
-DỮ LIỆU CONTEXT:
-- Vùng dữ liệu đang dùng (Used Range): ${usedRangeAddress}
-- Ô đang chọn (Active Cell): ${activeCellAddress}
-- Danh sách tất cả các Sheet: ${allSheetNames?.join(', ')}
-- Dữ liệu mẫu (JSON): ${JSON.stringify(data)}
+CONTEXT DATA:
+- Used Range: ${usedRangeAddress}
+- Active Cell: ${activeCellAddress}
+- All Sheet Names: ${allSheetNames?.join(', ')}
+- Sample Data (JSON): ${JSON.stringify(data)}
 
 ${intent ? `[INTENT: ${intent}]` : ''}
-YÊU CẦU: ${prompt}`
+REQUEST: ${prompt}`
           }
         ]
       }
