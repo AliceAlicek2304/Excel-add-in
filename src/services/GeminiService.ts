@@ -14,14 +14,22 @@ CÚ PHÁP EXCEL:
    - Nếu tên các Sheet là số (1, 2, 3...) hoặc chuỗi tuần tự, hãy tự suy luận Sheet trước/sau nếu người dùng yêu cầu (ví dụ: đang ở Sheet '2', yêu cầu 'lấy ngày trước' thì tham chiếu '1'!Range).
    - Cú pháp: 'Tên Sheet'!Vùng (ví dụ: '1'!G10).
 
-YÊU CẦU: Phân tích kỹ "Vùng dữ liệu đang dùng", "Ô đang chọn" (để biết đang ở Sheet nào) và "Danh sách Sheet" để trả về công thức thông minh nhất.`;
+YÊU CẦU: Phân tích kỹ "Vùng dữ liệu đang dùng", "Ô đang chọn" (để biết đang ở Sheet nào) và "Danh sách Sheet" để trả về công thức thông minh nhất.
+3. TẠO BIỂU ĐỒ (AI CHART): Nếu người dùng yêu cầu vẽ biểu đồ, hãy trả về JSON định dạng sau:
+   - {"type": "chart", "chartType": "pie"|"column"|"line", "range": "Vùng dữ liệu", "title": "Tiêu đề biểu đồ"}
+   - Lưu ý: Hãy chọn vùng dữ liệu có chứa cả tiêu đề và số liệu để biểu đồ đẹp nhất.`;
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export interface GeminiResult {
-  type: 'single' | 'array';
+  type: 'single' | 'array' | 'chart';
   value?: string;
   values?: string[];
+  chartData?: {
+    type: 'pie' | 'column' | 'line';
+    range: string;
+    title: string;
+  };
 }
 
 export const processWithGemini = async (apiKey: string, prompt: string, excelContext: any): Promise<GeminiResult> => {
@@ -83,14 +91,25 @@ YÊU CẦU: ${prompt}`
 
     const trimmed = text.trim();
 
-    if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+    // Check for Chart JSON or Array JSON
+    if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
       try {
-        const array = JSON.parse(trimmed);
-        if (Array.isArray(array)) {
-          return { type: 'array', values: array };
+        const json = JSON.parse(trimmed);
+        if (json.type === 'chart') {
+          return { 
+            type: 'chart', 
+            chartData: { 
+              type: json.chartType, 
+              range: json.range, 
+              title: json.title 
+            } 
+          };
+        }
+        if (Array.isArray(json)) {
+          return { type: 'array', values: json };
         }
       } catch (e) {
-        console.warn('Failed to parse array, treating as single value');
+        console.warn('Failed to parse JSON, treating as single value');
       }
     }
 

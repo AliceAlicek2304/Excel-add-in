@@ -33,59 +33,18 @@ const MainPanel: React.FC<MainPanelProps> = ({ apiKey, onApiKeyLoaded }) => {
   const [isDragOver, setIsDragOver] = useState(false);
 
   const handleCreateChart = async (type: string) => {
-    if (!prompt.trim()) {
-      setError('Vui lòng nhập vùng dữ liệu hoặc mô tả bảng trong Request (ví dụ: A1:B10).');
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      // Basic parsing of range from prompt if possible, otherwise use usedRange
-      const rangeMatch = prompt.match(/[A-Z]+[0-9]+:[A-Z]+[0-9]+/i);
-      let rangeToUse = rangeMatch ? rangeMatch[0] : null;
-
-      if (!rangeToUse) {
-        const context = await getSurroundingData();
-        rangeToUse = context.usedRangeAddress;
-      }
-
-      await createChart(type, rangeToUse, "Biểu đồ AI");
-      setHistory(prev => [...prev, { 
-        prompt: `Tạo biểu đồ ${type} cho ${rangeToUse}`, 
-        result: `Đã tạo biểu đồ ${type}`,
-        timestamp: new Date()
-      }]);
-    } catch (err: any) {
-      setError(`Lỗi tạo biểu đồ: ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
+    if (!apiKey) return;
+    const aiPrompt = `Hãy phân tích vùng dữ liệu hoặc yêu cầu sau và tạo một biểu đồ ${type}: ${prompt}`;
+    setPrompt(aiPrompt);
+    // Explicitly call handleProcess with the enriched prompt
+    setTimeout(handleProcess, 0);
   };
 
   const handleConsolidate = async (type: string) => {
-    if (!prompt.trim()) {
-      setError('Vui lòng nhập địa chỉ ô cần tổng hợp vào Request (ví dụ: G10).');
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const address = prompt.trim().toUpperCase();
-      await consolidateAllSheets(address, type);
-      setHistory(prev => [...prev, { 
-        prompt: `Tổng hợp ô ${address} từ tất cả Sheet`, 
-        result: `Đã tổng hợp & tạo biểu đồ ${type}`,
-        timestamp: new Date()
-      }]);
-    } catch (err: any) {
-      setError(`Lỗi tổng hợp: ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
+    if (!apiKey) return;
+    const aiPrompt = `Hãy tổng hợp dữ liệu từ ô ${prompt} ở tất cả các sheet và vẽ biểu đồ ${type}`;
+    setPrompt(aiPrompt);
+    setTimeout(handleProcess, 0);
   };
 
   // Shared styles for all menu levels (Main and Sub-menus)
@@ -173,7 +132,14 @@ const MainPanel: React.FC<MainPanelProps> = ({ apiKey, onApiKeyLoaded }) => {
       const excelContext = await getSurroundingData();
       const result = await processWithGemini(apiKey, prompt, excelContext);
       
-      if (result.type === 'array' && result.values) {
+      if (result.type === 'chart' && result.chartData) {
+        await createChart(result.chartData.type, result.chartData.range, result.chartData.title);
+        setHistory(prev => [...prev, { 
+          prompt, 
+          result: `Đã tạo biểu đồ ${result.chartData?.type} cho ${result.chartData?.range}`,
+          timestamp: new Date()
+        }]);
+      } else if (result.type === 'array' && result.values) {
         await writeArrayToRange(result.values);
         setHistory(prev => [...prev, { 
           prompt, 
